@@ -8,27 +8,28 @@ import pickle
 import os
 import time
 import logging
+import patternTemplates
 # End Imports
 
 # Globals
 NoneType = type(None)
-logging.basicConfig(filename='app.log')
+logging.basicConfig(filename='app.log',level=logging.DEBUG,format='%(asctime)s %(levelname)-8s < %(funcName)s > %(message)s')
 logger = logging.getLogger(__name__)
 # End Globals
 
 #Classes
-class Pattern():
+class PatternBase():
     params = {}
     def __init__(self,w=1000,h=1000,path=None,params={}):
         self.initialize(w,h)
         self.params.update(params)
         self.path = path
         logger.debug(str(self.params))
-        
+
     def initialize(self,width=800,height=800,x_inc = 0,y_inc = 0,
     rand_x_s= 0,rand_x_e = 0,rand_y_s = 0,
     rand_y_e = 0,step_x = 1,step_y = 1,s_degree = 0,e_degree = 360,point_method = '',fill_method = 'fill',color = '#000000'
-    ):
+    ,shape='line'):
         """
         Initialise parameters for pattern. It uses a new Image and canvas.
         Args:
@@ -69,11 +70,14 @@ class Pattern():
         self.params['e_degree'] = e_degree
         self.params['point_method'] = point_method
         self.params['fill_method'] = fill_method
-        self.params['current_color'] = color
+        self.params['color'] = color
+        self.params['shape'] = shape
 
+    def updateParams(self,params):
+        self.params.update(params)
         
-    def getParam(self,key):
-        return self.params.get(key)
+    def getParam(self,key,default=None):
+        return self.params.get(key,default)
 
     def getNewCanvas(self,width=1000,height=1000):
         canvas = ImageDraw.Draw(self.image)
@@ -117,7 +121,7 @@ class Pattern():
     def randRGB(self):
         return random.randint(0,255)
     def edge_check(self,*args):
-        return False
+        return True
 
     def forward(self,current):
         x = current[0]
@@ -150,6 +154,8 @@ class Pattern():
             return None
         else:
             return (x,y)
+
+
     def choose(self,choices):
         if len(choices) == 0:
             return None
@@ -160,27 +166,45 @@ class Pattern():
         return y+self.getParam('y_inc')+random.randint(self.getParam('rand_y_s'),self.getParam('rand_y_e'))
 
     def getNextPosition(self,current,shape='rectangle'):
+        """
+        Determines and conforms shape and next position
+        Args:
+            current: current pointer
+            shape: main shape
+        """
         available_choices = [func(current) for func in self.methods]
         available_choices = list(filter(lambda x: type(x)!= NoneType,available_choices))
         choice = self.choose(available_choices)
-        if choice == None:
+        if choice == None:      #No points available
             return None,None
         else:
-            if self.getParam('point_method') == 'choice':
+            if self.getParam('point_method') == 'true_new':           #True shape as defined in parameters in new position
                 choice_end = (self.getShapeX(choice[0]),self.getShapeY(choice[1]))
-                return [choice,choice_end],choice
-            elif self.getParam('point_method') == 'self_choice':
+                return [choice,choice_end],choice           
+
+            elif self.getParam('point_method') == 'ref_x_new':    #Reflective x shape in new position
                 choice_end = (self.getShapeX(choice[0]),self.getShapeY(choice[0]))
-                return [choice,choice_end],choice
-            elif self.getParam('point_method') == 'self_current':
+                return [choice,choice_end],choice   
+
+            elif self.getParam('point_method') == 'ref_x_curr':   #Reflective x shape in current position
                 choice_end = (self.getShapeX(choice[0]),self.getShapeY(choice[0]))
                 return [current,choice_end],choice_end
-            elif self.getParam('point_method') == 'current_choice':
+
+            elif self.getParam('point_method') == 'ref_y_new':    #Reflective y shape in new position
+                choice_end = (self.getShapeX(choice[1]),self.getShapeY(choice[1]))
+                return [choice,choice_end],choice   
+
+            elif self.getParam('point_method') == 'ref_y_curr':   #Reflective y shape in current position
+                choice_end = (self.getShapeX(choice[1]),self.getShapeY(choice[1]))
+                return [current,choice_end],choice_end
+
+            elif self.getParam('point_method') == 'true_curr': #True shape as defined in parameters in current position with next position as defined
                 choice_end = (self.getShapeX(choice[0]),self.getShapeY(choice[1]))
                 return [current,choice_end],choice
-            else:
-                choice_end = (self.getShapeX(choice[0]),self.getShapeY(choice[1]))
-                return [current,choice_end],choice_end
+
+            else:                                                   #True shape as defined in parameters in current position with next position reconformed
+                choice_end = (self.getShapeX(choice[0]),self.getShapeY(choice[1]))                  
+                return [current,choice_end],choice_end                  #Default choice
 
     def close(self):
         self.textFilePointer.close()
@@ -233,3 +257,58 @@ class Pattern():
                 coordinates.append(shape)
         if save == True:
             self.saveCoordinates(coordinates,str(length) +'_'+ str(initial_pointer))
+
+
+class Pattern():
+    """
+    Wrapper class
+    """
+    def __init__(self,w=1000,h=1000,path='.',params={}):
+        """
+        Initialise a pattern object with Image size and path
+        """
+        self.pattern = PatternBase(w,h,path,params)
+        self.params = params
+
+    def updateParams(self,params):
+        """
+        Updates current pattern parameter
+        """
+        return self.pattern.updateParams(params)
+
+    def saveImage(self,filename,text=True):
+        """
+        Save pattern as Image to filename in the path defined in params
+        Args:
+            filename: filename of the image
+            text: boolean True or False. Determines if current parameters needs to be saved 
+        """
+        return self.pattern.saveImage(filename,text)
+
+    def showImage(self):
+        """
+        Show the pattern so drawn as Image
+        """
+        return self.pattern.showImage()
+    
+    def drawPattern(self,length,initial_pointer,colour='#ffffff',shape=None):
+        """
+        Draws a pattern in canvas
+        Args:
+            length: no of continuous shapes drawn
+            initial_pointer: a tuple in form of (x,y) coordinate
+            colour: colour of the shape to be drawn
+            shape: shape to be drawn. Default: as set in params
+        """
+        if shape == None:
+            shape = self.pattern.getParam('shape','line')
+        return self.pattern.drawPattern(length=length,initial_pointer=initial_pointer,colour=colour,method=shape)
+    def drawTemplate(self,templateName,colour='#ffffff'):
+        templateObject = patternTemplates.Templates()
+        p = templateObject.getTemplate(templateName)
+        self.updateParams(p)
+        length = 100
+        self.drawPattern(length=p.get('length',length),
+        initial_pointer=(random.randint(0,self.pattern.getParam('width')), random.randint(0,self.pattern.getParam('height'))),
+        colour=p.get('colour',colour)
+        )
