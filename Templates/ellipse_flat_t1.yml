@@ -1,0 +1,17 @@
+pattern_name: ellipse_flat_t1
+version: 0.1
+
+x_inc: 0                # width of shape used. Default=1
+y_inc: 0                #height of shape used. Default=1
+rand_x_s: -10            #min randomization of shape width. Default=0
+rand_x_e: 10             #max randomization of shape width. Default=0
+rand_y_s: -5            #min randomization of shape height. Default=0
+rand_y_e: 5             #max randomization of shape height. Default=0
+step_x: 100             #step size in x direction. Determines next x coordinate. Default=1
+step_y: 100             #step size in y direction. Determines next y coordinate. Default=1
+s_degree:               #Starting degree of arc. Default=0. Applicable only with Outline draw with arcs
+e_degree:               #End degree of arc. Default=360. Applicable only with Outline draw with arcs
+point_method: default   #convolution method. Determines how shapes are populated in canvas
+fill_method: outline       #fill or outline. Determines shape colouring
+shape: ellipse             #shape to be used, one of line, arc, rectangle, ellipse
+length: 1500

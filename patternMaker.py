@@ -8,7 +8,7 @@ import pickle
 import os
 import time
 import logging
-import patternTemplates
+from . import patternTemplates
 # End Imports
 
 # Globals
@@ -303,8 +303,8 @@ class Pattern():
         if shape == None:
             shape = self.pattern.getParam('shape','line')
         return self.pattern.drawPattern(length=length,initial_pointer=initial_pointer,colour=colour,method=shape)
-    def drawTemplate(self,templateName,colour='#ffffff'):
-        templateObject = patternTemplates.Templates()
+    def drawTemplate(self,templateName,colour='#ffffff',location='Templates'):
+        templateObject = patternTemplates.Templates(location=location)
         p = templateObject.getTemplate(templateName)
         self.updateParams(p)
         length = 100
