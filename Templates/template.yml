@@ -1,0 +1,13 @@
+x_inc:                      # width of shape used. Default=1
+y_inc:                      #height of shape used. Default=1
+rand_x_s:                   #min randomization of shape width. Default=0
+rand_x_e:                   #max randomization of shape width. Default=0
+rand_y_s:                   #min randomization of shape height. Default=0
+rand_y_e:                   #max randomization of shape height. Default=0
+step_x:                     #step size in x direction. Determines next x coordinate. Default=1
+step_y:                     #step size in y direction. Determines next y coordinate. Default=1
+s_degree:                   #Starting degree of arc. Default=0. Applicable only with Outline draw with arcs
+e_degree:                   #End degree of arc. Default=360. Applicable only with Outline draw with arcs
+point_method:               #convolution method. Determines how shapes are populated in canvas. options = []
+fill_method:                #fill or outline. Determines shape colouring
+color:                      #shape color
