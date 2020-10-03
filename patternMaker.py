@@ -304,6 +304,13 @@ class Pattern():
             shape = self.pattern.getParam('shape','line')
         return self.pattern.drawPattern(length=length,initial_pointer=initial_pointer,colour=colour,method=shape)
     def drawTemplate(self,templateName,colour='#ffffff',location='Templates'):
+        """
+        Draws pattern based on template
+        Args:
+            templateName: Name of existing template
+            colour: Optional colour for the pattern
+            location: Default Templates folder
+        """
         templateObject = patternTemplates.Templates(location=location)
         p = templateObject.getTemplate(templateName)
         self.updateParams(p)
@@ -312,3 +319,9 @@ class Pattern():
         initial_pointer=(random.randint(0,self.pattern.getParam('width')), random.randint(0,self.pattern.getParam('height'))),
         colour=p.get('colour',colour)
         )
+    def getRandomInitalPointer(self):
+        """
+        Generates a random tuple as initial pointer
+        """
+        initial_pointer=(random.randint(0,self.pattern.getParam('width')), random.randint(0,self.pattern.getParam('height')))
+        return initial_pointer
