@@ -77,7 +77,10 @@ class PatternBase():
         self.params.update(params)
         
     def getParam(self,key,default=None):
-        return self.params.get(key,default)
+        if key in ['width','height','x_inc','y_inc','step_x','step_y','rand_x_s','rand_x_e','rand_y_s','rand_y_e','s_degree','e_degree']
+            return int(self.params.get(key,default))
+        else:
+            return self.params.get(key,default)
 
     def getNewCanvas(self,width=1000,height=1000):
         canvas = ImageDraw.Draw(self.image)
