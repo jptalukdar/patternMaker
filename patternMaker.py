@@ -8,7 +8,10 @@ import pickle
 import os
 import time
 import logging
-from . import patternTemplates
+try:
+    from . import patternTemplates
+except ImportError: 
+    import patternTemplates
 # End Imports
 
 # Globals
@@ -77,7 +80,7 @@ class PatternBase():
         self.params.update(params)
         
     def getParam(self,key,default=None):
-        if key in ['width','height','x_inc','y_inc','step_x','step_y','rand_x_s','rand_x_e','rand_y_s','rand_y_e','s_degree','e_degree']
+        if key in ['width','height','x_inc','y_inc','step_x','step_y','rand_x_s','rand_x_e','rand_y_s','rand_y_e','s_degree','e_degree']:
             return int(self.params.get(key,default))
         else:
             return self.params.get(key,default)
